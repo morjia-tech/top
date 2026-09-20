@@ -39,25 +39,63 @@
   }
   function changed() { dirty = true; status.textContent = '未保存の変更があります。'; }
   function imageField(parent, label, item, key) {
-    const field = input(parent, label + ' URL／パス', item[key], value => { item[key] = value; });
-    const labelNode = el('label', label + 'をPC・スマホから選ぶ（1画像1MBまで）', 'admin-field');
+    let version = 0;
+    const field = input(parent, label + ' URL／パス', item[key], value => { version++; item[key] = value; refresh(); });
+    const labelNode = el('label', label + 'をPC・スマホから選ぶ（20MBまで・大きい画像は自動縮小）', 'admin-field');
     const upload = el('input'); upload.type = 'file'; upload.accept = 'image/png,image/jpeg,image/webp,image/gif'; labelNode.append(upload); parent.append(labelNode);
+    const feedback = el('p', '', 'image-feedback'); feedback.setAttribute('role', 'status');
+    const preview = el('img', '', 'admin-image-preview'); preview.alt = label + 'のプレビュー';
+    const clear = el('button', '画像を外す', 'secondary'); clear.type = 'button';
+    parent.append(preview, feedback, clear);
+    function refresh(message) {
+      const value = item[key] || '';
+      let safe = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(value);
+      try { const url = new URL(value, location.href); safe ||= Boolean(value) && ['https:', 'http:', ...(location.protocol === 'file:' ? ['file:'] : [])].includes(url.protocol); } catch {}
+      preview.hidden = !safe;
+      if (safe) preview.src = value; else preview.removeAttribute('src');
+      feedback.textContent = message || (value ? '画像を設定済みです。変更した場合は下部の「保存して公開」で反映してください。' : '画像は未設定です。');
+    }
+    preview.addEventListener('error', () => { preview.hidden = true; feedback.textContent = '画像を表示できません。画像ファイルまたはURLを確認してください。'; });
+    clear.addEventListener('click', () => { version++; item[key] = ''; field.value = ''; upload.value = ''; changed(); refresh('画像を外しました。保存すると公開内容に反映されます。'); });
+    refresh();
+    const read = file => new Promise((resolve, reject) => {
+      const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error('画像を読み込めませんでした。')); reader.readAsDataURL(file);
+    });
+    async function prepare(file) {
+      const type = file.type || ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif' }[file.name.split('.').pop().toLowerCase()]);
+      if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(type)) throw new Error('PNG・JPEG・WebP・GIFを選んでください。HEICはJPEG等に変換してください。');
+      if (file.size > 20 * 1024 * 1024) throw new Error('画像が20MBを超えています。小さくしてから選んでください。');
+      if (type === 'image/gif' && file.size > 1024 * 1024) throw new Error('アニメーションGIFは1MB以下にしてください。');
+      if (file.size <= 1024 * 1024) return { data: await read(new Blob([file], { type })), resized: false };
+      const url = URL.createObjectURL(file);
+      try {
+        const img = new Image(); img.src = url; await img.decode();
+        let scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+        for (let attempt = 0; attempt < 5; attempt++, scale *= .75) {
+          const canvas = document.createElement('canvas'); canvas.width = Math.max(1, Math.round(img.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', .86));
+          if (blob && blob.size <= 1024 * 1024) return { data: await read(blob), resized: true };
+        }
+        throw new Error('画像を十分小さくできませんでした。小さい画像を選んでください。');
+      } finally { URL.revokeObjectURL(url); }
+    }
     upload.addEventListener('change', async () => {
       const file = upload.files[0]; if (!file) return;
-      if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 1024 * 1024) {
-        status.textContent = 'PNG・JPEG・WebP・GIFの1MB以下の画像を選んでください。'; upload.value = ''; return;
-      }
-      const reader = new FileReader();
-      imageReads++;
-      reader.onloadend = () => { imageReads--; };
-      reader.onload = () => { item[key] = String(reader.result); field.value = item[key]; changed(); };
-      reader.onerror = () => { status.textContent = '画像を読み込めませんでした。'; };
-      reader.readAsDataURL(file);
+      const current = ++version; imageReads++; feedback.textContent = '画像を読み込んでいます…';
+      try {
+        const result = await prepare(file);
+        if (version !== current) return;
+        item[key] = result.data; field.value = item[key]; changed();
+        refresh(`${file.name} を選択しました${result.resized ? '（保存用に軽量化済み）' : ''}。下部の「保存して公開」で反映します。`);
+      } catch (error) {
+        if (version === current) { feedback.textContent = error.message + ' 元の画像は変更していません。'; status.textContent = error.message; }
+      } finally { imageReads--; if (version === current) upload.value = ''; }
     });
   }
   function collection(parent, title, array, create, build) {
     const group = section(parent, title);
-    const list = el('div'); const add = el('button', '＋ ' + title + 'を追加', 'secondary'); add.type = 'button';
+    const list = el('div', '', 'admin-tree-children'); const add = el('button', '＋ ' + title + 'を追加', 'secondary'); add.type = 'button';
     group.append(list, add);
     function draw(focusIndex = -1) {
       list.replaceChildren();
@@ -72,6 +110,7 @@
         down.addEventListener('click', () => { [array[index + 1], array[index]] = [array[index], array[index + 1]]; changed(); draw(index + 1); });
         remove.addEventListener('click', () => { if (confirm('この項目を削除しますか？保存するまでは公開内容は変わりません。')) { array.splice(index, 1); changed(); draw(); add.focus(); } });
         controls.append(up, down, remove); card.append(controls); build(card, item);
+        card.addEventListener('input', () => { card.querySelector(':scope > summary').textContent = item.title || item.name || `${title} ${index + 1}`; });
       });
       if (!array.length) list.append(el('p', '項目はまだありません。'));
       if (focusIndex >= 0) list.children[focusIndex]?.querySelector('input,textarea')?.focus();
@@ -95,12 +134,12 @@
     const form = el('form'); dialog.append(form);
     const groups = [
       ['site', 'サイト名', [['name', 'サイト名'], ['description', 'サイト説明'], ['footer', 'フッター']]],
-      ['home', 'HOME', [['title', '大見出し', true], ['tagline', 'バナー下のひとこと'], ['introduction', '紹介文', true], ['worksButton', '作品ボタンの文字']]],
+      ['home', 'HOME', [['title', '大見出し', true], ['tagline', 'バナー下のひとこと'], ['introduction', '紹介文', true]]],
       ['about', 'ABOUT', [['name', '名前'], ['biography', '自己紹介', true]]],
       ['contact', 'CONTACT', [['message', 'お問い合わせ案内', true], ['email', 'メールアドレス'], ['formUrl', 'お問い合わせフォームURL']]]
     ];
     for (const [key, title, fields] of groups) {
-      const panel = section(form, title); if (key === 'home') panel.open = true;
+      const panel = section(form, title);
       for (const [field, label, multiline] of fields) input(panel, label, draft[key][field], value => { draft[key][field] = value; }, { multiline });
     }
     collection(form, 'WORKS', draft.works, () => ({ id: 'work-' + crypto.randomUUID(), title: '', category: '', status: '', summary: '', description: '', thumbnail: '', testPlayUrl: '', linkUrl: '', externalUrl: '', downloadUrl: '' }), (panel, work) => {
@@ -124,6 +163,10 @@
       input(panel, '短い説明', item.description, value => { item.description = value; }, { multiline: true });
     });
     const actions = el('div', '', 'admin-save-bar');
+    for (const name of ['サイト名', 'HOME', 'WORKS', 'GALLERY', 'ABOUT', 'LINKS', 'CONTACT']) {
+      const branch = [...form.children].find(child => child.tagName === 'DETAILS' && child.querySelector(':scope > summary').textContent === name);
+      if (branch) form.append(branch);
+    }
     const publish = el('button', '保存して公開'); publish.type = 'submit'; actions.append(publish, close); form.append(actions);
     form.addEventListener('submit', async event => {
       event.preventDefault(); if (busy) return;

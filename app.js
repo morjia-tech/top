@@ -47,14 +47,15 @@
   function heading(title) { main.append(node('h1', title)); }
   function workHref(work) { return '#work/' + encodeURIComponent(work.id); }
   function renderHome() {
-    append(main, image(data.home.banner, data.home.bannerAlt, 'brand-banner'));
-    if (data.home.tagline) main.append(node('p', data.home.tagline, 'tagline'));
     const section = node('section', undefined, 'home');
     section.append(node('h1', data.home.title || data.site.name));
     copy(section, data.home.introduction);
     append(section, image(data.home.image, data.home.imageAlt, 'feature-image'));
-    const button = node('a', data.home.worksButton, 'button'); button.href = '#works';
-    if (data.home.worksButton) section.append(button);
+    const menu = node('nav', undefined, 'home-menu'); menu.setAttribute('aria-label', '各ページへのリンク');
+    pages.filter(page => page !== 'home').forEach(page => {
+      const anchor = node('a', data.navigation[page]); anchor.href = '#' + page; menu.append(anchor);
+    });
+    section.append(menu);
     main.append(section);
   }
   function renderWorks() {
@@ -207,6 +208,13 @@
     let route;
     try { route = decodeURIComponent(location.hash.slice(1)) || 'home'; } catch { route = ''; }
     main.replaceChildren();
+    const banner = image(data.home.banner, data.home.bannerAlt, 'brand-banner');
+    if (banner) {
+      banner.loading = 'eager';
+      const header = node('div', undefined, 'page-banner'); header.append(banner);
+      if (data.home.tagline) header.append(node('p', data.home.tagline, 'tagline'));
+      main.append(header);
+    }
     document.title = `${data.navigation[route] || ui.detail} | ${data.site.name}`;
     const active = /^(work|play)\//.test(route) ? 'works' : route;
     document.querySelectorAll('nav a').forEach(anchor => {

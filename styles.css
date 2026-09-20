@@ -7,7 +7,7 @@
   --accent: #765838;           /* リンク・ボタン */
   --on-accent: #ffffff;        /* ボタン内の文字 */
   --border: #e7dccc;           /* 境界線 */
-  --font: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+  --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
   --card-radius: 12px;         /* 0pxで四角、24pxで丸め */
   --card-border: 1px;          /* 0pxで枠線なし */
   --card-shadow: none;         /* 例: 0 8px 24px #20283010 */
@@ -40,6 +40,10 @@ p { margin-top: 0; }
 .home h1 { white-space: pre-line; font-size: clamp(2rem, 5vw, 3.5rem); }
 .brand-banner { display: block; width: 100%; height: auto; border: 0; box-shadow: none; background: transparent; }
 .tagline { text-align: center; margin-top: 20px; }
+.page-banner { margin-bottom: clamp(32px, 5vw, 56px); }
+.home-menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; max-width: 620px; margin-top: 36px; }
+.home-menu a { display: block; padding: 14px 8px; text-align: center; border-bottom: 1px solid var(--border); font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
+.home-menu a:hover { background: var(--surface); border-color: var(--accent); }
 .morjia-pet-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
 .morjia-pet { position: absolute; width: 144px; height: 156px; left: 0; top: 0; transform-origin: 50% 100%; filter: drop-shadow(0 12px 7px #392a1e2e); will-change: transform; cursor: grab; pointer-events: auto; touch-action: none; user-select: none; }
 .morjia-pet:active { cursor: grabbing; }
@@ -79,10 +83,21 @@ dialog::backdrop { background: #10182066; }
 .admin-status { white-space: pre-wrap; margin-block: 16px; }
 .admin-dialog details { border-top: 1px solid var(--border); padding-block: 16px; }
 .admin-dialog summary { cursor: pointer; font-weight: 650; padding-block: 6px; }
+.admin-dialog summary { list-style: none; display: flex; align-items: baseline; gap: 10px; }
+.admin-dialog summary::-webkit-details-marker { display: none; }
+.admin-dialog summary::before { content: '▶'; font-size: .75em; flex: none; }
+.admin-dialog details[open] > summary::before { content: '▼'; }
+.admin-tree-children { margin: 10px 0 12px 12px; padding-left: 20px; border-left: 1px solid var(--border); }
+.admin-tree-children > details { position: relative; border-top: 0; padding-block: 6px; }
+.admin-tree-children > details::before { content: ''; position: absolute; width: 16px; left: -20px; top: 26px; border-top: 1px solid var(--border); }
+.admin-tree-children > details[open] { padding-bottom: 20px; }
 .admin-field { margin-block: 14px; }
 .admin-field textarea { display: block; width: 100%; font: inherit; color: var(--text); background: var(--background); border: 1px solid var(--border); border-radius: 6px; margin-top: 8px; padding: 10px; resize: vertical; }
 .admin-save-bar { position: sticky; bottom: -28px; padding-block: 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap; z-index: 1; }
 .collection-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.admin-image-preview { display: block; max-width: 100%; width: auto; max-height: 220px; object-fit: contain; margin-block: 12px; border-radius: 8px; background: var(--background); }
+.admin-image-preview[hidden] { display: none; }
+.image-feedback { font-size: .875rem; white-space: pre-wrap; margin-block: 12px; }
 .collection-controls button { padding: 6px 12px; }
 .admin-field select { width: 100%; font: inherit; padding: 10px; margin-top: 8px; color: var(--text); background: var(--background); border: 1px solid var(--border); border-radius: 6px; }
 .gallery-card { text-align: left; padding: 0; width: 100%; font: inherit; }
