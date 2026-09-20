@@ -27,7 +27,7 @@ button, .button { cursor: pointer; }
 nav { display: flex; gap: 12px 24px; flex-wrap: wrap; }
 nav a { font-size: .875rem; letter-spacing: .06em; padding-block: 8px; text-decoration: none; color: var(--muted); }
 nav a[aria-current="page"] { color: var(--accent); box-shadow: 0 2px var(--accent); }
-main { min-height: 65vh; padding-block: clamp(40px, 7vw, 80px); }
+main { min-height: 65vh; padding-top: clamp(20px, 3vw, 32px); padding-bottom: clamp(40px, 7vw, 80px); }
 main:focus { outline: none; }
 h1, h2, h3 { line-height: 1.4; margin-top: 0; }
 h1 { font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: .02em; margin-bottom: 32px; }
@@ -35,9 +35,8 @@ h2 { font-size: 1.25rem; margin-top: 32px; }
 h3 { font-size: 1.125rem; }
 p { margin-top: 0; }
 .copy { white-space: pre-wrap; max-width: 70ch; }
-.home { padding-block: clamp(24px, 6vw, 72px); }
-.home h1 { font-size: clamp(3rem, 9vw, 5rem); margin-bottom: 24px; }
-.home h1 { white-space: pre-line; font-size: clamp(2rem, 5vw, 3.5rem); }
+.home { padding: 0; }
+.home h1 { white-space: pre-line; }
 .brand-banner { display: block; width: 100%; height: auto; border: 0; box-shadow: none; background: transparent; }
 .tagline { text-align: center; margin-top: 20px; }
 .page-banner { margin-bottom: clamp(32px, 5vw, 56px); }
