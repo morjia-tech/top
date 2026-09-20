@@ -15,7 +15,7 @@
 }
 /* ===== 以下はレイアウト。通常は編集不要 ===== */
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--background); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+body { margin: 0; background-color: var(--background); background-image: repeating-linear-gradient(45deg, transparent 0 31px, #76583806 31px 32px, transparent 32px 64px), repeating-linear-gradient(-45deg, transparent 0 31px, #76583806 31px 32px, transparent 32px 64px); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
 a { color: var(--accent); text-underline-offset: .2em; }
 button, input { font: inherit; }
 button, .button { cursor: pointer; }
@@ -41,7 +41,8 @@ p { margin-top: 0; }
 .brand-banner { display: block; width: 100%; height: auto; border: 0; box-shadow: none; background: transparent; }
 .tagline { text-align: center; margin-top: 20px; }
 .morjia-pet-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
-.morjia-pet { position: absolute; width: 144px; height: 156px; left: 0; top: 0; transform-origin: 50% 100%; filter: drop-shadow(0 12px 7px #392a1e2e); will-change: transform; cursor: pointer; pointer-events: auto; touch-action: manipulation; }
+.morjia-pet { position: absolute; width: 144px; height: 156px; left: 0; top: 0; transform-origin: 50% 100%; filter: drop-shadow(0 12px 7px #392a1e2e); will-change: transform; cursor: grab; pointer-events: auto; touch-action: none; user-select: none; }
+.morjia-pet:active { cursor: grabbing; }
 .morjia-pet-speech { position: absolute; max-width: 190px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; background: var(--surface); color: var(--text); font-size: .875rem; line-height: 1.5; opacity: 0; transition: opacity .2s; }
 .morjia-pet-speech.is-visible { opacity: 1; }
 @media (max-width: 600px) { .morjia-pet { width: 116px; height: 126px; } }
@@ -71,7 +72,7 @@ figcaption { font-size: .875rem; color: var(--muted); margin-top: 8px; }
 footer { border-top: 1px solid var(--border); padding-block: 24px; color: var(--muted); font-size: .875rem; }
 dialog { width: min(440px, calc(100% - 32px)); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 28px; color: var(--text); background: var(--surface); }
 dialog::backdrop { background: #10182066; }
-.admin-launcher { display: block; margin: 0 auto 24px; padding: 6px 12px; font-size: .875rem; }
+.admin-launcher { display: block; margin: 0 max(20px, calc((100% - var(--content-width)) / 2)) 24px auto; padding: 4px 8px; font-size: .875rem; background: transparent; color: var(--muted); border: 0; }
 .admin-dialog { width: min(720px, calc(100% - 24px)); max-height: 90vh; overflow-y: auto; }
 .admin-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .admin-heading h2 { margin: 0; }
@@ -80,7 +81,15 @@ dialog::backdrop { background: #10182066; }
 .admin-dialog summary { cursor: pointer; font-weight: 650; padding-block: 6px; }
 .admin-field { margin-block: 14px; }
 .admin-field textarea { display: block; width: 100%; font: inherit; color: var(--text); background: var(--background); border: 1px solid var(--border); border-radius: 6px; margin-top: 8px; padding: 10px; resize: vertical; }
-.admin-save-bar { position: sticky; bottom: -28px; padding-block: 16px; background: var(--surface); border-top: 1px solid var(--border); }
+.admin-save-bar { position: sticky; bottom: -28px; padding-block: 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap; z-index: 1; }
+.collection-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.collection-controls button { padding: 6px 12px; }
+.admin-field select { width: 100%; font: inherit; padding: 10px; margin-top: 8px; color: var(--text); background: var(--background); border: 1px solid var(--border); border-radius: 6px; }
+.gallery-card { text-align: left; padding: 0; width: 100%; font: inherit; }
+.gallery-card .gallery-thumb { aspect-ratio: 1; object-fit: contain; background: var(--surface); }
+.lightbox { width: min(1000px, calc(100% - 24px)); max-height: 92vh; overflow: auto; }
+.lightbox img { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto 16px; object-fit: contain; }
+.game-frame { width: 100%; height: min(72vh, 720px); min-height: 320px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--card-radius); }
 .cloud-notice { max-width: var(--content-width); margin: 16px auto; padding-inline: 20px; color: var(--muted); }
 button:disabled { opacity: .6; cursor: wait; }
 dialog h2 { margin-top: 0; }

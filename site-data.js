@@ -12,7 +12,7 @@ window.SITE_DATA = {
     footer: "MORJIA"
   },
   navigation: {
-    home: "HOME", works: "WORKS", about: "ABOUT", links: "LINKS", contact: "CONTACT"
+    home: "HOME", works: "WORKS", gallery: "GALLERY", about: "ABOUT", links: "LINKS", contact: "CONTACT"
   },
   home: {
     banner: "assets/morjia_banner_transparent.png",
@@ -46,6 +46,7 @@ window.SITE_DATA = {
       technologies: ["Python", "Tkinter"], github: "", itch: "", steam: "", access: { details: false, download: false }
     }
   ],
+  gallery: [],
   pet: {
     enabled: true,
     sprite: "assets/morjia_spritesheet.webp",
@@ -57,6 +58,7 @@ window.SITE_DATA = {
     idleMessages: ["ふーん、そういうことね。"]
   },
   links: {
+    items: [], // { name: "名前", url: "https://...", description: "説明（任意）" }
     github: "",
     itch: "",
     x: "",

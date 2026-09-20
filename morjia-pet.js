@@ -52,6 +52,7 @@
       this.speechTimer = 0;
       this.pendingAction = '';
       this.peekMirror = false;
+      this.drag = null;
 
       const greet = () => {
         this.target = { x: this.x, y: this.y };
@@ -60,7 +61,32 @@
         this.say(messages[Math.floor(Math.random() * messages.length)] || 'にゃ。');
         this.setAction('wave', 1300);
       };
-      this.canvas.addEventListener('pointerdown', event => { event.stopPropagation(); greet(); });
+      this.canvas.addEventListener('pointerdown', event => {
+        if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+        event.preventDefault();
+        this.drag = { id: event.pointerId, startX: event.clientX, startY: event.clientY, x: this.x, y: this.y, moved: false };
+        this.canvas.setPointerCapture(event.pointerId);
+        this.target = { x: this.x, y: this.y }; this.pendingAction = ''; this.setAction('idle');
+      });
+      this.canvas.addEventListener('pointermove', event => {
+        if (!this.drag || event.pointerId !== this.drag.id) return;
+        const dx = event.clientX - this.drag.startX, dy = event.clientY - this.drag.startY;
+        if (Math.hypot(dx, dy) > 5) this.drag.moved = true;
+        if (!this.drag.moved) return;
+        this.x = Math.max(0, Math.min(innerWidth - this.canvas.clientWidth, this.drag.x + dx));
+        this.y = Math.max(0, Math.min(innerHeight - this.canvas.clientHeight, this.drag.y + dy));
+        this.target = { x: this.x, y: this.y }; this.position();
+      });
+      const release = (event, cancelled = false) => {
+        if (!this.drag || event.pointerId !== this.drag.id) return;
+        const moved = this.drag.moved; this.drag = null;
+        if (this.canvas.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId);
+        this.target = { x: this.x, y: this.y }; this.setAction('idle', 3000);
+        if (!moved && !cancelled) greet();
+      };
+      this.canvas.addEventListener('pointerup', event => release(event));
+      this.canvas.addEventListener('pointercancel', event => release(event, true));
+      this.canvas.addEventListener('lostpointercapture', event => release(event, true));
       this.canvas.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); greet(); }
       });
@@ -93,6 +119,7 @@
       const b = this.bounds();
       this.x = Math.min(b.maxX, Math.max(b.minX, this.x));
       this.y = Math.min(b.maxY, Math.max(b.minY, this.y));
+      this.target = { x: this.x, y: this.y };
     }
 
     randomDuration(action) {
@@ -171,21 +198,16 @@
         this.frame = (this.frame + steps) % action.frames;
         this.lastFrameAt += steps * frameDuration;
       }
-      const rawBlend = Math.max(0, Math.min(1, (time - this.lastFrameAt) / frameDuration));
-      const blend = rawBlend * rawBlend * (3 - 2 * rawBlend);
-      const nextFrame = (this.frame + 1) % action.frames;
+      this.frame %= action.frames;
       this.ctx.clearRect(0, 0, CELL.width, CELL.height);
       this.ctx.save();
       if (this.action === 'peek' && this.peekMirror) {
         this.ctx.translate(CELL.width, 0);
         this.ctx.scale(-1, 1);
       }
-      this.ctx.globalAlpha = 1 - blend;
+      this.ctx.globalAlpha = 1;
+      this.ctx.globalCompositeOperation = 'source-over';
       this.ctx.drawImage(this.sprites[action.sheet], this.frame * CELL.width, action.row * CELL.height,
-        CELL.width, CELL.height, 0, 0, CELL.width, CELL.height);
-      this.ctx.globalAlpha = blend;
-      this.ctx.globalCompositeOperation = 'lighter';
-      this.ctx.drawImage(this.sprites[action.sheet], nextFrame * CELL.width, action.row * CELL.height,
         CELL.width, CELL.height, 0, 0, CELL.width, CELL.height);
       this.ctx.restore();
     }
@@ -199,6 +221,9 @@
     tick(time) {
       const delta = Math.min(0.04, this.lastTickAt ? (time - this.lastTickAt) / 1000 : 0.016);
       this.lastTickAt = time;
+      if (this.drag) {
+        this.draw(time); this.position(); requestAnimationFrame(next => this.tick(next)); return;
+      }
       const walking = this.move(delta);
       if (!walking && this.pendingAction) {
         const pending = this.pendingAction;

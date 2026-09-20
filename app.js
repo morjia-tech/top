@@ -5,7 +5,7 @@
   const data = window.SITE_DATA;
   const ui = data.ui;
   const main = document.querySelector('#main');
-  const pages = ['home', 'works', 'about', 'links', 'contact'];
+  const pages = ['home', 'works', 'gallery', 'about', 'links', 'contact'];
   const node = (tag, text, className) => {
     const el = document.createElement(tag);
     if (text !== undefined) el.textContent = text;
@@ -29,7 +29,7 @@
     return el;
   }
   function image(path, alt, className) {
-    const src = safeUrl(path);
+    const src = typeof path === 'string' && /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(path) ? path : safeUrl(path);
     if (!src) return null;
     const img = node('img', undefined, className);
     img.src = src; img.alt = alt || ''; img.loading = 'lazy';
@@ -62,13 +62,14 @@
     if (!data.works.length) return empty(ui.emptyWorks);
     const grid = node('div', undefined, 'grid');
     data.works.forEach(work => {
-      const card = node('a', undefined, 'card'); card.href = workHref(work);
+      const card = node('article', undefined, 'card');
       append(card, image(work.thumbnail, work.title));
       const body = node('div', undefined, 'card-content');
       if (work.category) body.append(node('p', work.category, 'meta'));
-      body.append(node('h2', work.title || ui.noTitle));
+      const title = node('h2'); const detail = node('a', work.title || ui.noTitle); detail.href = workHref(work); title.append(detail); body.append(title);
       copy(body, work.summary);
       if (work.status) body.append(node('p', work.status, 'meta'));
+      if (canPlay(work)) { const play = node('a', 'TEST PLAY', 'button'); play.href = '#play/' + encodeURIComponent(work.id); body.append(play); }
       card.append(body); grid.append(card);
     });
     main.append(grid);
@@ -84,11 +85,10 @@
   function renderLinks() {
     heading(data.navigation.links);
     const list = node('ul', undefined, 'link-list');
-    const entries = ['github', 'itch', 'x', 'steam'].map(key => ({ label: ui[key], url: data.links[key] }));
-    entries.push(...data.links.custom);
+    const entries = data.links.items || [];
     entries.forEach(entry => {
-      const anchor = link(entry.label, entry.url);
-      if (anchor) { const item = node('li'); item.append(anchor); list.append(item); }
+      const anchor = link(entry.name || entry.url, entry.url);
+      if (anchor) { const item = node('li'); item.append(anchor); copy(item, entry.description); list.append(item); }
     });
     if (list.children.length) main.append(list); else empty(ui.emptyLinks);
   }
@@ -137,6 +137,9 @@
     }
     const actions = node('div', undefined, 'actions');
     append(actions, link(ui.video, work.videoUrl, 'button secondary'));
+    append(actions, link('リンク', work.linkUrl, 'button secondary'));
+    append(actions, link('外部サイト', work.externalUrl, 'button secondary'));
+    if (canPlay(work)) { const play = node('a', 'このサイトで遊ぶ', 'button'); play.href = '#play/' + encodeURIComponent(work.id); actions.append(play); }
     ['github', 'itch', 'steam'].forEach(key => append(actions, link(ui[key], work[key], 'button secondary')));
     if (safeUrl(work.downloadUrl)) {
       if (window.SiteAuth.isAllowed(work, 'download')) append(actions, link(ui.download, work.downloadUrl, 'button'));
@@ -157,19 +160,63 @@
     heading(ui.notFound);
     const back = node('a', ui.homeLink); back.href = '#home'; main.append(back);
   }
+  function canPlay(work) { return work.category === 'GAME' && work.status === 'TEST PLAY' && safeUrl(work.testPlayUrl); }
+  function renderPlay(id) {
+    const work = data.works.find(item => item.id === id);
+    if (!work || !canPlay(work)) return notFound();
+    if (!window.SiteAuth.isAllowed(work, 'details')) return renderDetail(id);
+    const back = node('a', '作品詳細に戻る', 'back'); back.href = workHref(work); main.append(back);
+    heading(work.title || ui.noTitle);
+    const frame = node('iframe', undefined, 'game-frame');
+    frame.title = work.title || 'TEST PLAY'; frame.src = safeUrl(work.testPlayUrl);
+    frame.setAttribute('sandbox', 'allow-scripts allow-pointer-lock');
+    frame.allow = 'fullscreen; gamepad'; frame.allowFullscreen = true;
+    main.append(frame);
+    copy(main, '表示されない場合は、別画面でゲームを開いてください。');
+    const external = link('ゲームを別画面で開く', work.testPlayUrl, 'button secondary');
+    external.target = '_blank'; external.rel = 'noopener noreferrer'; main.append(external);
+  }
+  function renderGallery() {
+    heading(data.navigation.gallery);
+    if (!data.gallery.length) return empty('公開中の画像はありません。');
+    const grid = node('div', undefined, 'grid gallery-grid');
+    data.gallery.forEach(item => {
+      const img = image(item.image, item.title || item.comment || '', 'gallery-thumb');
+      if (!img) return;
+      const button = node('button', undefined, 'card gallery-card');
+      button.setAttribute('aria-label', (item.title || '画像') + 'を拡大');
+      button.append(img);
+      const body = node('div', undefined, 'card-content');
+      if (item.title) body.append(node('h2', item.title));
+      if (item.category) body.append(node('p', item.category, 'meta'));
+      copy(body, item.comment); if (body.children.length) button.append(body);
+      button.addEventListener('click', () => {
+        const modal = node('dialog', undefined, 'lightbox'); modal.setAttribute('aria-label', item.title || '画像の拡大表示');
+        append(modal, image(item.image, item.title || item.comment || ''));
+        copy(modal, item.title); copy(modal, item.comment);
+        const close = node('button', '閉じる', 'secondary'); close.addEventListener('click', () => modal.close());
+        modal.append(close); modal.addEventListener('close', () => { modal.remove(); button.focus(); });
+        modal.addEventListener('click', event => { if (event.target === modal) { const r = modal.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) modal.close(); } });
+        document.body.append(modal); modal.showModal(); close.focus();
+      });
+      grid.append(button);
+    });
+    if (grid.children.length) main.append(grid); else empty('公開中の画像はありません。');
+  }
   function render(focus = true) {
     let route;
     try { route = decodeURIComponent(location.hash.slice(1)) || 'home'; } catch { route = ''; }
     main.replaceChildren();
     document.title = `${data.navigation[route] || ui.detail} | ${data.site.name}`;
-    const active = route.startsWith('work/') ? 'works' : route;
+    const active = /^(work|play)\//.test(route) ? 'works' : route;
     document.querySelectorAll('nav a').forEach(anchor => {
       if (anchor.hash === '#' + active) anchor.setAttribute('aria-current', 'page');
       else anchor.removeAttribute('aria-current');
     });
-    const views = { home: renderHome, works: renderWorks, about: renderAbout, links: renderLinks, contact: renderContact };
+    const views = { home: renderHome, works: renderWorks, gallery: renderGallery, about: renderAbout, links: renderLinks, contact: renderContact };
     if (views[route]) views[route]();
     else if (route.startsWith('work/')) renderDetail(route.slice(5));
+    else if (route.startsWith('play/')) renderPlay(route.slice(5));
     else notFound();
     if (focus) { main.focus({ preventScroll: true }); window.scrollTo(0, 0); }
   }

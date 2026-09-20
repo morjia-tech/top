@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   const cfg = window.MORJIA_CLOUD;
-  const defaults = structuredClone(window.SITE_DATA);
-  const sections = ['site', 'navigation', 'home', 'about', 'works', 'links', 'contact'];
+  const defaults = window.MorjiaSchema.normalize(window.SITE_DATA);
+  const sections = ['site', 'navigation', 'home', 'about', 'works', 'gallery', 'links', 'contact'];
   let session = null;
   let documentRow = null;
   let loadError = '';
@@ -11,11 +11,14 @@
   const base = (cfg.url || '').replace(/\/$/, '');
   const resource = '/rest/v1/portfolio_content?id=eq.' + encodeURIComponent(cfg.documentId);
   function validate(content) {
+    window.MorjiaSchema.validate(content);
     if (!content || typeof content !== 'object' || Array.isArray(content)) throw new Error('保存データの形式が違います。');
     for (const section of sections) {
       if (!(section in content)) continue;
       const value = content[section];
-      if (section === 'works') {
+      if (section === 'gallery') {
+        if (!Array.isArray(value)) throw new Error('GALLERYの形式が違います。');
+      } else if (section === 'works') {
         if (!Array.isArray(value) || value.some(w => !w || typeof w.id !== 'string' || !w.id || typeof w.title !== 'string')) throw new Error('作品のIDと作品名を確認してください。');
         if (new Set(value.map(w => w.id)).size !== value.length) throw new Error('作品IDが重複しています。');
       } else if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('保存データの項目が不正です。');
@@ -33,6 +36,7 @@
   }
   function apply(content) {
     validate(content);
+    content = window.MorjiaSchema.normalize({ ...defaults, ...content });
     for (const key of sections) window.SITE_DATA[key] = mergeKnown(defaults[key], content[key]);
     dispatchEvent(new Event('morjia-content-updated'));
   }
@@ -98,6 +102,7 @@
     return result;
   }
   window.MorjiaCloud = { configured, login, save, logout, editableData, apply, get loadError() { return loadError; } };
+  apply(defaults);
   window.SITE_READY = configured ? load().then(row => apply(row.content)).catch(() => {
     loadError = '最新の内容を読み込めなかったため、同梱の内容を表示しています。';
   }) : Promise.resolve();
