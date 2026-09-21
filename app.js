@@ -179,9 +179,11 @@
   }
   function renderGallery() {
     heading(data.navigation.gallery);
-    if (!data.gallery.length) return empty('公開中の画像はありません。');
+    for (const group of ['オリキャラ', 'ファンアート']) {
+    const section = node('section', undefined, 'gallery-section');
+    section.append(node('h2', group));
     const grid = node('div', undefined, 'grid gallery-grid');
-    data.gallery.forEach(item => {
+    data.gallery.filter(item => item.galleryGroup === group).forEach(item => {
       const img = image(item.image, item.title || item.comment || '', 'gallery-thumb');
       if (!img) return;
       const button = node('button', undefined, 'card gallery-card');
@@ -202,7 +204,9 @@
       });
       grid.append(button);
     });
-    if (grid.children.length) main.append(grid); else empty('公開中の画像はありません。');
+    if (grid.children.length) section.append(grid); else section.append(node('p', '公開中の画像はありません。', 'empty'));
+    main.append(section);
+    }
   }
   function render(focus = true) {
     let route;

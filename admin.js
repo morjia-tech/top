@@ -151,7 +151,13 @@
         input(panel, label, work[key], value => { work[key] = value; }, { multiline });
       }
     });
-    collection(form, 'GALLERY', draft.gallery, () => ({ image: '', title: '', comment: '', category: '' }), (panel, item) => {
+    collection(form, 'GALLERY', draft.gallery, () => ({ image: '', title: '', comment: '', category: '', galleryGroup: 'オリキャラ' }), (panel, item) => {
+      const groupLabel = el('label', '掲載先', 'admin-field'); const groupSelect = el('select');
+      groupSelect.setAttribute('aria-label', '掲載先');
+      for (const name of ['オリキャラ', 'ファンアート']) { const option = el('option', name); option.value = name; groupSelect.append(option); }
+      groupSelect.value = item.galleryGroup || 'オリキャラ';
+      groupSelect.addEventListener('change', () => { item.galleryGroup = groupSelect.value; changed(); });
+      groupLabel.append(groupSelect); panel.append(groupLabel);
       imageField(panel, '画像', item, 'image');
       input(panel, 'タイトル', item.title, value => { item.title = value; });
       input(panel, '短いコメント', item.comment, value => { item.comment = value; }, { multiline: true });

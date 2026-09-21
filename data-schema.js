@@ -10,7 +10,9 @@
         category: categories[work.category] || work.category || '',
         status: statuses[work.status] || work.status || ''
       }));
-      data.gallery ??= [];
+      data.gallery = (data.gallery || []).map(item => ({ ...item,
+        galleryGroup: ['オリキャラ', 'ファンアート'].includes(item.galleryGroup) ? item.galleryGroup : (item.category === 'ファンアート' ? 'ファンアート' : 'オリキャラ')
+      }));
       const links = data.links || {};
       if (!Array.isArray(links.items)) {
         const names = { github: 'GitHub', itch: 'itch.io', x: 'X', steam: 'Steam' };

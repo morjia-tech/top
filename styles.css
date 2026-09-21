@@ -40,8 +40,11 @@ p { margin-top: 0; }
 .brand-banner { display: block; width: 100%; height: auto; border: 0; box-shadow: none; background: transparent; }
 .tagline { text-align: center; margin-top: 20px; }
 .page-banner { margin-bottom: clamp(32px, 5vw, 56px); }
-.home-menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; max-width: 620px; margin-top: 36px; }
-.home-menu a { display: block; padding: 14px 8px; text-align: center; border-bottom: 1px solid var(--border); font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
+.home-menu { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px clamp(8px, 2vw, 24px); width: 100%; margin: 36px auto 0; }
+.home-menu a { grid-column: span 2; display: block; padding: 14px 8px; text-align: center; border-bottom: 1px solid var(--border); font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
+.home-menu a:nth-child(4) { grid-column: 2 / span 2; }
+.home-menu a:nth-child(5) { grid-column: 4 / span 2; }
+.gallery-section + .gallery-section { margin-top: 48px; }
 .home-menu a:hover { background: var(--surface); border-color: var(--accent); }
 .morjia-pet-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
 .morjia-pet { position: absolute; width: 144px; height: 156px; left: 0; top: 0; transform-origin: 50% 100%; filter: drop-shadow(0 12px 7px #392a1e2e); will-change: transform; cursor: grab; pointer-events: auto; touch-action: none; user-select: none; }
