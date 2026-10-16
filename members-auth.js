@@ -44,9 +44,9 @@
     if (activePrompt) return activePrompt;
     activePrompt = new Promise(resolve => {
       const previous = document.activeElement;
-      const dialog = document.createElement('dialog'); dialog.className = 'members-login'; dialog.setAttribute('aria-label', '限定コンテンツのパスワード');
+      const dialog = document.createElement('dialog'); dialog.className = 'members-login'; dialog.setAttribute('aria-label', '作品の閲覧');
       const form = document.createElement('form');
-      const heading = document.createElement('h2'); heading.textContent = '限定コンテンツ';
+      const heading = document.createElement('h2'); heading.textContent = 'パスワードを入力';
       const hint = document.createElement('p'); hint.textContent = '共通パスワードを入力してください。認証は2時間有効です。';
       const label = document.createElement('label'); label.textContent = '閲覧パスワード';
       const input = document.createElement('input'); input.type = 'password'; input.required = true; input.maxLength = 256; input.autocomplete = 'current-password'; label.append(input);

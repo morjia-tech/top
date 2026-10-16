@@ -1,13 +1,11 @@
-# 限定コンテンツ機能
+# 今回の変更：作品を押したときのパスワード画面
 
-HOME・WORKS・GALLERY・ABOUT・LINKS・CONTACTは公開のままです。
-限定項目を開くときだけ共通パスワードが必要になります。管理者ログインとは独立しています。
+HOME・WORKS一覧・GALLERY・ABOUT・LINKS・CONTACTは通常どおり開きます。
+WORKSのGAMEなどのカテゴリ、作品名、TEST PLAYを開くと、閲覧パスワードの画面が出ます。
+正しく入力すると作品詳細・テストプレイ画面へ進み、同じタブでは2時間再入力不要です。
+キャンセルすると作品本文は表示せず、再入力ボタンを残します。
 
-このフォルダはGitHubアップロード用です。別フォルダの「はじめに.md」に従ってSupabaseの設定を済ませてください。
-Edge Function名は `morjia-members` です。サイト全体ロック用の `morjia-gate` は使用しません。
+Supabaseに登録済みのmorjia-membersとSecretsを使用します。新しいコンテンツの登録は不要です。
+管理者のログイン・保存と猫の処理は変更していません。
 
-今のサイト内編集フォームは**公開用**です。限定の本文・画像・実ファイルを既存の作品説明や画像欄へ入れないでください。
-限定の登録はSupabaseの `portfolio_private_content` と非公開Storage `morjia-private/members/` で行います。
-
-この更新では、`members-auth.js` と `members-content.js` を追加し、`app.js`・`index.html`・`styles.css` に表示を追加しています。
-管理者の認証・保存、通常のデータ形式、猫の画像・動作は変更していません。
+今回の段階で追加したのは作品を開く入口の動きです。既存の作品データやGitHub上の画像・ゲーム本体を非公開へ移す処理は行っていません。実ファイルの直接取得を防ぐには、限定対象を非公開Storageへ分ける次の対応が必要です。

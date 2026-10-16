@@ -62,6 +62,7 @@ p { margin-top: 0; }
 .card-content > :last-child { margin-bottom: 0; }
 .card img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
 .meta { font-size: .875rem; color: var(--muted); }
+.work-category { display: block; width: fit-content; margin-bottom: 1em; text-decoration: underline; text-underline-offset: .25em; }
 .tags, .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 24px; padding: 0; list-style: none; }
 .tags li { font-size: .875rem; border: 1px solid var(--border); padding: 4px 12px; border-radius: var(--card-radius); }
 .button, button { display: inline-block; padding: 10px 20px; border: 1px solid var(--accent); border-radius: var(--card-radius); background: var(--accent); color: var(--on-accent); text-decoration: none; }

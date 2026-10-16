@@ -6,6 +6,7 @@
   const ui = data.ui;
   const main = document.querySelector('#main');
   const pages = ['home', 'works', 'gallery', 'about', 'links', 'contact'];
+  let entryPromptRoute = '';
   const node = (tag, text, className) => {
     const el = document.createElement(tag);
     if (text !== undefined) el.textContent = text;
@@ -66,7 +67,9 @@
       const card = node('article', undefined, 'card');
       append(card, image(work.thumbnail, work.title));
       const body = node('div', undefined, 'card-content');
-      if (work.category) body.append(node('p', work.category, 'meta'));
+      if (work.category) {
+        const category = node('a', work.category, 'meta work-category'); category.href = workHref(work); body.append(category);
+      }
       const title = node('h2'); const detail = node('a', work.title || ui.noTitle); detail.href = workHref(work); title.append(detail); body.append(title);
       copy(body, work.summary);
       if (work.status) body.append(node('p', work.status, 'meta'));
@@ -114,6 +117,7 @@
     const back = node('a', ui.backToWorks, 'back'); back.href = '#works'; main.append(back);
     heading(work.title || ui.noTitle);
     document.title = `${work.title || ui.noTitle} | ${data.site.name}`;
+    if (workEntryLocked()) return;
     if (!window.SiteAuth.isAllowed(work, 'details')) {
       copy(main, ui.locked);
       const button = node('button', ui.unlock);
@@ -166,9 +170,29 @@
     const back = node('a', ui.homeLink); back.href = '#home'; main.append(back);
   }
   function canPlay(work) { return work.category === 'GAME' && work.status === 'TEST PLAY' && safeUrl(work.testPlayUrl); }
+  function workEntryLocked() {
+    if (window.MorjiaMembers.valid()) return false;
+    const route = location.hash;
+    copy(main, '作品を見るには、閲覧パスワードを入力してください。');
+    const open = node('button', 'パスワードを入力'); open.type = 'button'; main.append(open);
+    const enter = async () => {
+      if (location.hash !== route) return;
+      if (await window.MorjiaMembers.ensure()) {
+        if (location.hash === route) render(false);
+      }
+    };
+    open.addEventListener('click', enter);
+    // Open once per route entry. Cancel leaves a retry button, without looping.
+    if (entryPromptRoute !== route) {
+      entryPromptRoute = route;
+      setTimeout(enter, 0);
+    }
+    return true;
+  }
   function renderPlay(id) {
     const work = data.works.find(item => item.id === id);
     if (!work || !canPlay(work)) return notFound();
+    if (!window.MorjiaMembers.valid()) return renderDetail(id);
     if (!window.SiteAuth.isAllowed(work, 'details')) return renderDetail(id);
     const back = node('a', '作品詳細に戻る', 'back'); back.href = workHref(work); main.append(back);
     heading(work.title || ui.noTitle);
@@ -227,6 +251,7 @@
     }
     document.title = `${data.navigation[route] || ui.detail} | ${data.site.name}`;
     const active = /^(work|play)\//.test(route) ? 'works' : route;
+    if (active !== 'works' || route === 'works') entryPromptRoute = '';
     document.querySelectorAll('nav a').forEach(anchor => {
       if (anchor.hash === '#' + active) anchor.setAttribute('aria-current', 'page');
       else anchor.removeAttribute('aria-current');
@@ -258,5 +283,11 @@
   document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); main.focus(); });
   addEventListener('hashchange', () => render());
   addEventListener('morjia-members-catalog', () => render(false));
+  addEventListener('morjia-members-session', () => {
+    // Clear an open work detail immediately on logout/expiry; public pages stay put.
+    if (!window.MorjiaMembers.valid() && /^#(?:work|play)\//.test(location.hash)) {
+      entryPromptRoute = location.hash; render(false);
+    }
+  });
   render(false);
 })();
