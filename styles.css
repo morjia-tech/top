@@ -107,6 +107,14 @@ dialog::backdrop { background: #10182066; }
 .lightbox { width: min(1000px, calc(100% - 24px)); max-height: 92vh; overflow: auto; }
 .lightbox img { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto 16px; object-fit: contain; }
 .game-frame { width: 100%; height: min(72vh, 720px); min-height: 320px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--card-radius); }
+.members-slot { margin-block: 32px; padding: 24px; border: 1px solid var(--border); border-radius: var(--card-radius); background: #fffdf9b3; }
+.members-slot h2 { margin-top: 0; }
+.members-status { margin-block: 12px; }
+.members-private > button { margin: 8px 12px 8px 0; }
+.members-private figure { max-width: 100%; margin-block: 24px; }
+.members-private figure img { max-height: 70vh; object-fit: contain; }
+.members-logout { display: block; margin: 0 max(20px, calc((100% - var(--content-width)) / 2)) 24px auto; padding: 4px 8px; background: transparent; color: var(--muted); border: 0; font-size: .875rem; }
+.members-logout[hidden], .members-slot [hidden] { display: none; }
 .cloud-notice { max-width: var(--content-width); margin: 16px auto; padding-inline: 20px; color: var(--muted); }
 button:disabled { opacity: .6; cursor: wait; }
 dialog h2 { margin-top: 0; }

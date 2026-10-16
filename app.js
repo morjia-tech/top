@@ -71,6 +71,9 @@
       copy(body, work.summary);
       if (work.status) body.append(node('p', work.status, 'meta'));
       if (canPlay(work)) { const play = node('a', 'TEST PLAY', 'button'); play.href = '#play/' + encodeURIComponent(work.id); body.append(play); }
+      if (window.MorjiaMemberContent.forWork(work.id).length) {
+        const members = node('a', '限定コンテンツ', 'button secondary'); members.href = workHref(work); body.append(members);
+      }
       card.append(body); grid.append(card);
     });
     main.append(grid);
@@ -156,6 +159,7 @@
       }
     }
     if (actions.children.length) main.append(actions);
+    window.MorjiaMemberContent.forWork(work.id).forEach(entry => window.MorjiaMemberContent.mount(main, entry));
   }
   function notFound() {
     heading(ui.notFound);
@@ -207,11 +211,13 @@
     if (grid.children.length) section.append(grid); else section.append(node('p', '公開中の画像はありません。', 'empty'));
     main.append(section);
     }
+    window.MorjiaMemberContent.gallery(main);
   }
   function render(focus = true) {
     let route;
     try { route = decodeURIComponent(location.hash.slice(1)) || 'home'; } catch { route = ''; }
     main.replaceChildren();
+    window.MorjiaMemberContent.release();
     const banner = image(data.home.banner, data.home.bannerAlt, 'brand-banner');
     if (banner) {
       banner.loading = 'eager';
@@ -229,6 +235,7 @@
     if (views[route]) views[route]();
     else if (route.startsWith('work/')) renderDetail(route.slice(5));
     else if (route.startsWith('play/')) renderPlay(route.slice(5));
+    else if (route.startsWith('members/')) window.MorjiaMemberContent.page(main, route.slice(8));
     else notFound();
     if (focus) { main.focus({ preventScroll: true }); window.scrollTo(0, 0); }
   }
@@ -250,5 +257,6 @@
   addEventListener('morjia-content-updated', () => { renderChrome(); render(false); });
   document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); main.focus(); });
   addEventListener('hashchange', () => render());
+  addEventListener('morjia-members-catalog', () => render(false));
   render(false);
 })();
