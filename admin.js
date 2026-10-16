@@ -194,17 +194,19 @@
       const guide = el('a', '初回設定の説明を開く'); guide.href = 'ONLINE-SETUP.md'; guide.target = '_blank'; guide.rel = 'noopener'; dialog.append(guide);
       const actions = el('div', '', 'admin-save-bar'); actions.append(close); dialog.append(actions); return;
     }
+    dialog.append(el('p', '編集用のメールアドレスと管理者パスワードを入力してください。作品を見るための共通パスワードとは別です。'));
     const form = el('form'); dialog.append(form);
-    let email = '', password = '';
-    const emailInput = input(form, 'メールアドレス', '', value => { email = value; }, { type: 'email', required: true });
-    const passwordInput = input(form, 'パスワード', '', value => { password = value; }, { type: 'password', required: true });
+    const emailInput = input(form, 'メールアドレス', '', () => {}, { type: 'email', required: true });
+    const passwordInput = input(form, 'パスワード', '', () => {}, { type: 'password', required: true });
+    emailInput.name = 'username'; passwordInput.name = 'password';
     emailInput.autocomplete = 'username'; passwordInput.autocomplete = 'current-password';
     // ログイン情報の入力を公開内容の未保存変更として扱わない。
     form.addEventListener('input', () => { dirty = false; status.textContent = ''; });
     const submit = el('button', 'ログイン'); submit.type = 'submit'; const actions = el('div', '', 'admin-save-bar'); actions.append(submit, close); form.append(actions);
     form.addEventListener('submit', async event => {
       event.preventDefault(); if (busy) return; busy = true; submit.disabled = true; close.disabled = true; status.textContent = '確認しています…';
-      try { const row = await cloud.login(email.trim(), password); password = ''; passwordInput.value = ''; editor(row); }
+      // Read the actual fields at submit time, including browser/password-manager autofill.
+      try { const row = await cloud.login(emailInput.value.trim(), passwordInput.value); passwordInput.value = ''; editor(row); }
       catch (error) { status.textContent = error.message; }
       finally { busy = false; submit.disabled = false; close.disabled = false; }
     });

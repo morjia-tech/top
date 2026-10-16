@@ -47,6 +47,20 @@
       ...(body === undefined ? {} : { body: JSON.stringify(body) })
     });
     if (!response.ok) {
+      if (path.startsWith('/auth/v1/')) {
+        let detail = {};
+        try { detail = await response.json(); } catch {}
+        const rawCode = detail.code || detail.error_code || detail.error || '';
+        const code = typeof rawCode === 'string' && /^[a-z0-9_]{1,80}$/.test(rawCode) ? rawCode : '';
+        const reason = String(detail.msg || detail.message || detail.error_description || '');
+        if (code === 'invalid_credentials' || /invalid login credentials/i.test(reason)) throw new Error('管理者のメールアドレスまたはパスワードが一致しません。作品を見るための共通パスワードとは別です。保存済みの入力を消して、管理者用の情報を入力し直してください。');
+        if (code === 'email_not_confirmed' || /email not confirmed/i.test(reason)) throw new Error('管理者アカウントのメール確認が完了していません。SupabaseのAuthentication → Usersで確認状態を確認してください（email_not_confirmed）。');
+        if (code === 'user_banned') throw new Error('この管理者アカウントは現在利用が制限されています（user_banned）。SupabaseのAuthentication → Usersで状態を確認してください。');
+        if (code === 'email_provider_disabled' || code === 'provider_disabled') throw new Error('Supabaseでメールアドレスによるログインが無効です（' + code + '）。認証設定の確認が必要です。');
+        if (response.status === 429 || code.startsWith('over_')) throw new Error('ログインの試行回数が多いため、少し待ってからお試しください（' + (code || '429') + '）。');
+        if (path.includes('grant_type=refresh_token')) throw new Error('管理者ログインの有効期限が切れました。入力内容を控えてから、閉じてログインし直してください。');
+        throw new Error('管理者認証に失敗しました（' + response.status + (code ? ' / ' + code : '') + '）。このエラー文をお知らせください。パスワードは送らないでください。');
+      }
       if (response.status === 401) throw new Error('ログインできないか、有効期限が切れました。メールアドレスとパスワードを確認し、再ログインしてください。');
       if (response.status === 403) throw new Error('このアカウントには編集権限がありません。');
       throw new Error(`接続に失敗しました（${response.status}）。入力内容は残っています。接続設定・サーバー設定を確認してください。`);
