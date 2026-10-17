@@ -14,3 +14,15 @@ body { padding: 0; margin: 0 }
 #unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
 #unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+
+/* Fit the complete game, including its footer, inside the embedding viewport. */
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+#unity-container.unity-desktop, #unity-container.unity-mobile {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  height: auto;
+}
+#unity-canvas { display: block; max-width: 100%; outline: none; }
+#unity-footer { height: 38px; color: #fff; }
+.unity-mobile #unity-footer { height: 0; }
+#unity-canvas:fullscreen { width: 100vw !important; height: 100vh !important; max-width: none; }
+#unity-canvas:-webkit-full-screen { width: 100vw !important; height: 100vh !important; max-width: none; }

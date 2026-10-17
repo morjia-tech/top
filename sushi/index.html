@@ -2,6 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | 寿司、ピザ、ケーキ</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
@@ -10,7 +11,7 @@
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width=1600 height=900 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -105,9 +106,26 @@
 
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+        // The same 16:9 composition must fit smaller browser windows and iframes.
       }
+
+      function fitGameInWindow() {
+        // Unity owns canvas sizing while its fullscreen API is active.
+        if (document.fullscreenElement || document.webkitFullscreenElement) return;
+        var container = document.querySelector("#unity-container");
+        var footer = document.querySelector("#unity-footer");
+        var footerHeight = footer.offsetHeight;
+        var width = Math.max(1, Math.min(document.documentElement.clientWidth,
+          Math.max(1, document.documentElement.clientHeight - footerHeight) * 16 / 9));
+        var height = width * 9 / 16;
+        container.style.width = width + "px";
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+      }
+      window.addEventListener("resize", fitGameInWindow);
+      document.addEventListener("fullscreenchange", () => requestAnimationFrame(fitGameInWindow));
+      document.addEventListener("webkitfullscreenchange", () => requestAnimationFrame(fitGameInWindow));
+      fitGameInWindow();
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
