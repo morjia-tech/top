@@ -1,0 +1,11 @@
+g_Comic Koin free educational-kanji edition v0.4 (Regular and Bold)
+Copyright (c) 2013-2017 Gyokuei / ZARASU.com. All rights retained by the author.
+
+Author and distribution: https://material.animehack.jp/font_gcomickoin.html
+Usage terms: https://font.animehack.jp/#rule
+Original readme: g-comickoin-readme.txt (Japanese, Shift-JIS).
+
+This game embeds only the small static glyph subsets used by its own UI.
+Do not extract or redistribute the font or its glyph subsets as a font resource.
+The original TTF files are not included in the distributed game or Unity project.
+Obtain the font from its author to regenerate or extend the baked UI assets.
