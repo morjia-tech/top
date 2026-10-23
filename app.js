@@ -117,7 +117,7 @@
     const back = node('a', ui.backToWorks, 'back'); back.href = '#works'; main.append(back);
     heading(work.title || ui.noTitle);
     document.title = `${work.title || ui.noTitle} | ${data.site.name}`;
-    if (workEntryLocked()) return;
+    if (workEntryLocked(work)) return;
     if (!window.SiteAuth.isAllowed(work, 'details')) {
       copy(main, ui.locked);
       const button = node('button', ui.unlock);
@@ -170,7 +170,10 @@
     const back = node('a', ui.homeLink); back.href = '#home'; main.append(back);
   }
   function canPlay(work) { return work.category === 'GAME' && work.status === 'TEST PLAY' && safeUrl(work.testPlayUrl); }
-  function workEntryLocked() {
+  // サイト内のゲーム入口だけを切り替える設定。非公開ファイルの認証とは独立。
+  function requiresEntryPassword(work) { return !(canPlay(work) && work.requirePlayPassword === false); }
+  function workEntryLocked(work) {
+    if (!requiresEntryPassword(work)) return false;
     if (window.MorjiaMembers.valid()) return false;
     const route = location.hash;
     copy(main, '作品を見るには、閲覧パスワードを入力してください。');
@@ -192,7 +195,7 @@
   function renderPlay(id) {
     const work = data.works.find(item => item.id === id);
     if (!work || !canPlay(work)) return notFound();
-    if (!window.MorjiaMembers.valid()) return renderDetail(id);
+    if (requiresEntryPassword(work) && !window.MorjiaMembers.valid()) return renderDetail(id);
     if (!window.SiteAuth.isAllowed(work, 'details')) return renderDetail(id);
     const back = node('a', '作品詳細に戻る', 'back'); back.href = workHref(work); main.append(back);
     heading(work.title || ui.noTitle);
@@ -286,6 +289,11 @@
   addEventListener('morjia-members-session', () => {
     // Clear an open work detail immediately on logout/expiry; public pages stay put.
     if (!window.MorjiaMembers.valid() && /^#(?:work|play)\//.test(location.hash)) {
+      let id;
+      try { id = decodeURIComponent(location.hash.slice(6)); } catch { return; }
+      const work = data.works.find(item => item.id === id);
+      // OFFのゲームは別の閲覧セッションが切れても再読み込みしない。
+      if (work && !requiresEntryPassword(work)) return;
       entryPromptRoute = location.hash; render(false);
     }
   });

@@ -142,10 +142,19 @@
       const panel = section(form, title);
       for (const [field, label, multiline] of fields) input(panel, label, draft[key][field], value => { draft[key][field] = value; }, { multiline });
     }
-    collection(form, 'WORKS', draft.works, () => ({ id: 'work-' + crypto.randomUUID(), title: '', category: '', status: '', summary: '', description: '', thumbnail: '', testPlayUrl: '', linkUrl: '', externalUrl: '', downloadUrl: '' }), (panel, work) => {
+    collection(form, 'WORKS', draft.works, () => ({ id: 'work-' + crypto.randomUUID(), title: '', category: '', status: '', summary: '', description: '', thumbnail: '', testPlayUrl: '', requirePlayPassword: true, linkUrl: '', externalUrl: '', downloadUrl: '' }), (panel, work) => {
       input(panel, '作品ID（公開後は変更非推奨）', work.id, value => { work.id = value; }, { required: true });
       choice(panel, 'カテゴリ', work.category, ['GAME', 'TOOL / APP', 'OTHER'], value => { work.category = value; });
       choice(panel, 'ステータス', work.status, ['MAKING', 'TEST PLAY', 'RELEASED'], value => { work.status = value; });
+      const passwordLabel = el('label', '遊ぶときのパスワード', 'admin-field');
+      const passwordSelect = el('select'); passwordSelect.setAttribute('aria-label', '遊ぶときのパスワード');
+      for (const [value, text] of [['on', 'ON：共通パスワードが必要'], ['off', 'OFF：誰でも遊べる']]) {
+        const option = el('option', text); option.value = value; passwordSelect.append(option);
+      }
+      passwordSelect.value = work.requirePlayPassword === false ? 'off' : 'on';
+      passwordSelect.addEventListener('change', () => { work.requirePlayPassword = passwordSelect.value !== 'off'; changed(); });
+      passwordLabel.append(passwordSelect); panel.append(passwordLabel);
+      panel.append(el('p', 'カテゴリがGAME・ステータスがTEST PLAY・URL設定済みの作品に適用します。OFFなら詳細とゲームをそのまま開けます。別の限定コンテンツの鍵は変わりません。ゲームの直接URLを保護する機能ではありません。', 'meta'));
       imageField(panel, 'サムネイル画像', work, 'thumbnail');
       for (const [key, label, multiline] of [['title', '作品名'], ['summary', '短い説明', true], ['description', '詳しい説明', true], ['linkUrl', 'リンクURL'], ['testPlayUrl', 'TEST PLAY URL'], ['externalUrl', '外部サイトURL'], ['videoUrl', '動画URL'], ['downloadUrl', 'ダウンロードURL'], ['github', 'GitHub URL'], ['itch', 'itch.io URL'], ['steam', 'Steam URL']]) {
         input(panel, label, work[key], value => { work[key] = value; }, { multiline });

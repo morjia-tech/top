@@ -8,7 +8,9 @@
       data.navigation = { ...data.navigation, gallery: 'GALLERY' };
       data.works = (data.works || []).map(work => ({ ...work,
         category: categories[work.category] || work.category || '',
-        status: statuses[work.status] || work.status || ''
+        status: statuses[work.status] || work.status || '',
+        // 未設定の既存作品はON。明示的なfalseだけを公開プレイとして扱います。
+        requirePlayPassword: work.requirePlayPassword !== false
       }));
       data.gallery = (data.gallery || []).map(item => ({ ...item,
         galleryGroup: ['オリキャラ', 'ファンアート'].includes(item.galleryGroup) ? item.galleryGroup : (item.category === 'ファンアート' ? 'ファンアート' : 'オリキャラ')
@@ -27,6 +29,7 @@
       for (const work of content.works || []) {
         if (!work.id || typeof work.id !== 'string' || ids.has(work.id)) throw new Error('作品IDは空欄にせず、重複しない値にしてください。');
         ids.add(work.id);
+        if (work.requirePlayPassword !== undefined && typeof work.requirePlayPassword !== 'boolean') throw new Error('ゲームの閲覧パスワード設定はON／OFFで選んでください。');
       }
       if (content.gallery !== undefined && (!Array.isArray(content.gallery) || content.gallery.some(item => !item || typeof item !== 'object'))) throw new Error('GALLERYの形式が違います。');
       if (content.links?.items !== undefined && !Array.isArray(content.links.items)) throw new Error('LINKSの形式が違います。');
