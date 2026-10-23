@@ -27,7 +27,7 @@ window.addEventListener('pagehide',()=>{if(unityInstance)unityInstance.SendMessa
 const config={dataUrl:'Build/37.data.unityweb',frameworkUrl:'Build/37.framework.js.unityweb',codeUrl:'Build/37.wasm.unityweb',streamingAssetsUrl:'StreamingAssets',companyName:"Prototype",productName:"スリーセブン",productVersion:"1.0",devicePixelRatio:1,matchWebGLToCanvasSize:true,autoSyncPersistentDataPath:true,showBanner:(text,type)=>{if(type==='error')failure(text);}};
 function failure(text){loading.style.display='flex';message.textContent='起動できませんでした。もう一度お試しください。';console.error(text);document.getElementById('retry').hidden=false;}
 document.getElementById('retry').onclick=()=>location.reload();
-start.onclick=()=>{loading.style.display='none';canvas.focus({preventScroll:true});};
+start.onclick=()=>{loading.style.display='none';canvas.focus({preventScroll:true});window.sevenfallStarted=true;};
 const script=document.createElement('script');script.src='Build/37.loader.js';script.onload=()=>createUnityInstance(canvas,config,progress=>{document.getElementById('progress').style.width=(progress*100)+'%';}).then(instance=>{unityInstance=instance;window.unityInstance=instance;message.textContent='準備できました';start.hidden=false;}).catch(failure);script.onerror=failure;document.body.appendChild(script);
 </script>
 </body>
