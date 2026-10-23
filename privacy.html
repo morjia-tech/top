@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>アクセス集計について | MORJIA</title>
+  <link rel="stylesheet" href="styles.css?v=analytics-admin-1">
+  <script defer src="analytics.js?v=analytics-admin-1"></script>
+</head>
+<body>
+  <header class="header"><a class="brand" href="./">MORJIA</a></header>
+  <main>
+    <h1>アクセス集計について</h1>
+    <p>サイトを育てるため、見られたページ・訪問回数の目安・流入元の種類・スマートフォン／パソコンの区分をSupabaseへ送信し、管理者だけが確認できるよう集計します。</p>
+    <p>この集計データには、氏名、メールアドレス、IPアドレス、入力内容、パスワード、参照元の完全なURLは保存しません。ブラウザの個体識別を目的とするフィンガープリントも使いません。配信・通信サービス側の通常のアクセスログとは別の仕組みです。</p>
+    <p>Cookieは使わず、タブ内の一時保存（sessionStorage）にランダムな訪問IDを保存します。30分間操作がない場合は次のページ表示時に更新します。サーバーの集計データは最長90日分です。90日を超えたデータは次の集計受付時に削除します。</p>
+    <p>ブラウザのDo Not TrackやGlobal Privacy Controlが有効な場合は集計しません。下の設定でもこのブラウザを除外できます。除外の希望だけをlocalStorageへ保存します。</p>
+    <label class="analytics-preference"><input type="checkbox" data-analytics-exclude> このブラウザのアクセスを集計しない</label>
+    <p data-analytics-status role="status"></p>
+    <p><a href="./">サイトに戻る</a></p>
+  </main>
+</body>
+</html>

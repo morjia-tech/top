@@ -4,6 +4,11 @@
   const el = (tag, text, cls) => {
     const node = document.createElement(tag); if (text) node.textContent = text; if (cls) node.className = cls; return node;
   };
+  window.SITE_READY.then(() => {
+    if (cloud.loadError) { const notice = el('p', cloud.loadError, 'cloud-notice'); notice.setAttribute('role', 'status'); document.querySelector('.header').after(notice); }
+  });
+  // 入口を目立たなくするだけで、編集権限は引き続きSupabase側で検証します。
+  if (new URLSearchParams(location.search).get('admin') !== '1') return;
   let dirty = false;
   let busy = false;
   let imageReads = 0;
@@ -125,6 +130,62 @@
     values.forEach(value => { const option = el('option', value || '未設定'); option.value = value; select.append(option); });
     select.value = value || ''; select.addEventListener('change', () => { change(select.value); changed(); }); label.append(select); parent.append(label);
   }
+  function analyticsPanel(parent) {
+    const panel = section(parent, 'アクセス状況');
+    const note = el('p', '人数そのものではなく訪問回数の目安です。30分の間隔・タブ・日付変更などで別訪問になります。日本時間で集計し、最長90日分を表示します。', 'meta');
+    const tools = el('div', '', 'analytics-tools');
+    const label = el('label', '表示期間 ', 'admin-field'); const period = el('select'); period.setAttribute('aria-label', '集計期間');
+    for (const days of [7, 30, 90]) { const option = el('option', '過去' + days + '日'); option.value = String(days); period.append(option); }
+    label.append(period);
+    const refresh = el('button', '集計を更新', 'secondary'); refresh.type = 'button'; tools.append(label, refresh);
+    const preference = el('label', '', 'analytics-preference'); const exclude = el('input'); exclude.type = 'checkbox'; exclude.checked = window.MorjiaAnalytics?.excluded() ?? true;
+    preference.append(exclude, document.createTextNode(' このブラウザのアクセスを集計しない'));
+    const preferenceStatus = el('p', '', 'meta'); preferenceStatus.setAttribute('role', 'status');
+    exclude.addEventListener('change', () => { preferenceStatus.textContent = window.MorjiaAnalytics?.setExcluded(exclude.checked) ? 'このブラウザの設定を保存しました。' : 'ブラウザの保存設定により変更できませんでした。'; });
+    const message = el('p', '', 'meta'); message.setAttribute('role', 'status');
+    const output = el('div', '', 'analytics-output');
+    panel.append(note, tools, preference, preferenceStatus, message, output);
+    let loaded = false, generation = 0;
+    const count = value => Number.isFinite(Number(value)) && Number(value) >= 0 ? Number(value).toLocaleString('ja-JP') : '0';
+    function table(title, headers, rows) {
+      const heading = el('h3', title), wrap = el('div', '', 'analytics-table-wrap'), table = el('table', '', 'analytics-table');
+      const head = el('thead'), row = el('tr'); headers.forEach(text => { const th = el('th', text); th.scope = 'col'; row.append(th); }); head.append(row);
+      const body = el('tbody');
+      for (const values of rows) { const tr = el('tr'); values.forEach(text => tr.append(el('td', text))); body.append(tr); }
+      if (!rows.length) { const tr = el('tr'), td = el('td', 'まだ記録がありません。'); td.colSpan = headers.length; tr.append(td); body.append(tr); }
+      table.append(head, body); wrap.append(table); output.append(heading, wrap);
+    }
+    function pageLabel(page) {
+      if (window.SITE_DATA.navigation[page]) return window.SITE_DATA.navigation[page];
+      const id = String(page).replace(/^(work|play)\//, '');
+      const work = window.SITE_DATA.works.find(item => item.id === id);
+      return (String(page).startsWith('play/') ? 'プレイ画面：' : '作品詳細：') + (work?.title || id);
+    }
+    async function load() {
+      const current = ++generation; refresh.disabled = true; message.textContent = '集計を読み込んでいます…';
+      try {
+        const result = await cloud.stats(Number(period.value));
+        if (!panel.isConnected || current !== generation) return;
+        output.replaceChildren(); loaded = true;
+        const cards = el('div', '', 'analytics-metrics');
+        for (const [title, value] of [['今日の訪問（目安）', result.today?.visits], ['今日のページ表示', result.today?.views], ['期間中の訪問（目安）', result.total?.visits], ['期間中のページ表示', result.total?.views]]) {
+          const card = el('div', '', 'analytics-metric'); card.append(el('span', title), el('strong', count(value))); cards.append(card);
+        }
+        output.append(cards);
+        table('見られたページ', ['ページ', '表示回数'], (result.pages || []).map(item => [pageLabel(item.page), count(item.views)]));
+        const sources = { direct: '直接／参照元不明', google: 'Google', bing: 'Bing', x: 'X', instagram: 'Instagram', facebook: 'Facebook', github: 'GitHub', other: 'その他のサイト' };
+        table('どこから来たか', ['流入元', '訪問（目安）'], (result.sources || []).map(item => [sources[item.source] || 'その他', count(item.visits)]));
+        table('スマホ／パソコン', ['端末', '訪問（目安）'], (result.devices || []).map(item => [item.device === 'mobile' ? 'スマホ・タブレット' : 'パソコン', count(item.visits)]));
+        table('日ごとの記録', ['日付（日本時間）', '訪問（目安）', 'ページ表示'], (result.daily || []).map(item => [item.day, count(item.visits), count(item.views)]));
+        message.textContent = '更新しました。集計開始前の記録はありません。広告ブロック等による欠測や自動アクセスがあるため参考値です。' + (result.limited ? ' 集計上限に達した日があり、一部のアクセスは含まれていません。' : '');
+      } catch (error) {
+        if (panel.isConnected && current === generation) { output.replaceChildren(); message.textContent = error.message; }
+      } finally { if (current === generation) refresh.disabled = false; }
+    }
+    panel.addEventListener('toggle', () => { if (panel.open && !loaded && !refresh.disabled) load(); });
+    refresh.addEventListener('click', load); period.addEventListener('change', load);
+    panel.append(el('p', 'プレイ画面の表示数は、ゲーム開始回数・プレイ時間・クリア回数ではありません。流入元はブラウザの設定により不明になることがあります。', 'meta'));
+  }
   function editor(row) {
     cloud.apply(row.content);
     let revision = row.revision;
@@ -132,6 +193,7 @@
     dirty = false; frame('サイトの編集');
     dialog.append(el('p', '保存すると公開内容に反映されます。空欄のURLは表示されません。'));
     const form = el('form'); dialog.append(form);
+    analyticsPanel(form);
     const groups = [
       ['site', 'サイト名', [['name', 'サイト名'], ['description', 'サイト説明'], ['footer', 'フッター']]],
       ['home', 'HOME', [['title', '大見出し', true], ['tagline', 'バナー下のひとこと'], ['introduction', '紹介文', true]]],
@@ -222,6 +284,6 @@
   }
   launcher.addEventListener('click', () => { login(); dialog.showModal(); });
   window.SITE_READY.then(() => {
-    if (cloud.loadError) { const notice = el('p', cloud.loadError, 'cloud-notice'); notice.setAttribute('role', 'status'); document.querySelector('.header').after(notice); }
+    login(); dialog.showModal();
   });
 })();

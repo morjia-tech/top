@@ -103,6 +103,20 @@ dialog::backdrop { background: #10182066; }
 .image-feedback { font-size: .875rem; white-space: pre-wrap; margin-block: 12px; }
 .collection-controls button { padding: 6px 12px; }
 .admin-field select { width: 100%; font: inherit; padding: 10px; margin-top: 8px; color: var(--text); background: var(--background); border: 1px solid var(--border); border-radius: 6px; }
+.analytics-privacy { width: min(var(--content-width), calc(100% - 40px)); margin: 0 auto 24px; font-size: .75rem; }
+.analytics-privacy a { color: var(--muted); }
+.analytics-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.analytics-tools select { font: inherit; padding: 6px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.analytics-preference { display: flex; align-items: flex-start; gap: 8px; font-size: .875rem; }
+.analytics-preference input { width: auto; margin: .5em 0 0; flex: none; }
+.analytics-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-block: 20px; }
+.analytics-metric { padding: 14px; border: 1px solid var(--border); border-radius: var(--card-radius); }
+.analytics-metric span { display: block; font-size: .75rem; color: var(--muted); }
+.analytics-metric strong { display: block; font-size: 1.5rem; }
+.analytics-table-wrap { overflow-x: auto; margin-bottom: 24px; }
+.analytics-table { width: 100%; border-collapse: collapse; font-size: .875rem; text-align: left; }
+.analytics-table th, .analytics-table td { padding: 8px; border-bottom: 1px solid var(--border); }
+.analytics-output h3 { margin-top: 24px; }
 .gallery-card { text-align: left; padding: 0; width: 100%; font: inherit; }
 .gallery-card .gallery-thumb { aspect-ratio: 1; object-fit: contain; background: var(--surface); }
 .lightbox { width: min(1000px, calc(100% - 24px)); max-height: 92vh; overflow: auto; }

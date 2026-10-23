@@ -47,6 +47,7 @@
       ...(body === undefined ? {} : { body: JSON.stringify(body) })
     });
     if (!response.ok) {
+      if (path === '/rest/v1/rpc/morjia_analytics_stats' && response.status === 404) throw new Error('アクセス集計の初回設定がまだ完了していません。Supabaseで setup-analytics.sql を実行してください。');
       if (path.startsWith('/auth/v1/')) {
         let detail = {};
         try { detail = await response.json(); } catch {}
@@ -115,7 +116,11 @@
     for (const key of sections) result[key] = structuredClone(window.SITE_DATA[key]);
     return result;
   }
-  window.MorjiaCloud = { configured, login, save, logout, editableData, apply, get loadError() { return loadError; } };
+  async function stats(days = 7) {
+    if (![7, 30, 90].includes(days)) throw new Error('集計期間は7日・30日・90日から選んでください。');
+    return api('/rest/v1/rpc/morjia_analytics_stats', { method: 'POST', body: { p_document_id: cfg.documentId, p_days: days }, token: await accessToken() });
+  }
+  window.MorjiaCloud = { configured, login, save, logout, editableData, apply, stats, get loadError() { return loadError; } };
   apply(defaults);
   window.SITE_READY = configured ? load().then(row => apply(row.content)).catch(() => {
     loadError = '最新の内容を読み込めなかったため、同梱の内容を表示しています。';
