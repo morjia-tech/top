@@ -123,7 +123,7 @@
                 "y": 0,
                 "z": -1
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
                 "x": 1,
                 "y": 0,
@@ -139,7 +139,7 @@
                 "y": 0,
                 "z": 1
             },
-            "secondaryType": "Empty",
+            "secondaryType": "L",
             "secondaryRight": {
                 "x": 1,
                 "y": 0,
@@ -147,13 +147,13 @@
             },
             "secondaryUp": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": 1
             },
             "secondaryForward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
+                "y": -1,
+                "z": 0
             }
         },
         {
@@ -162,7 +162,7 @@
                 "y": 0,
                 "z": 0
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
                 "x": 1,
                 "y": 0,
@@ -170,19 +170,19 @@
             },
             "up": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": -1
             },
             "forward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
-            },
-            "secondaryType": "Empty",
-            "secondaryRight": {
-                "x": 1,
-                "y": 0,
+                "y": 1,
                 "z": 0
+            },
+            "secondaryType": "L",
+            "secondaryRight": {
+                "x": 0,
+                "y": 0,
+                "z": -1
             },
             "secondaryUp": {
                 "x": 0,
@@ -190,9 +190,9 @@
                 "z": 0
             },
             "secondaryForward": {
-                "x": 0,
+                "x": 1,
                 "y": 0,
-                "z": 1
+                "z": 0
             }
         },
         {
@@ -240,15 +240,15 @@
                 "y": 1,
                 "z": -1
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
-                "x": 1,
-                "y": 0,
+                "x": 0,
+                "y": -1,
                 "z": 0
             },
             "up": {
-                "x": 0,
-                "y": 1,
+                "x": 1,
+                "y": 0,
                 "z": 0
             },
             "forward": {
@@ -256,7 +256,7 @@
                 "y": 0,
                 "z": 1
             },
-            "secondaryType": "Empty",
+            "secondaryType": "L",
             "secondaryRight": {
                 "x": 1,
                 "y": 0,
@@ -264,13 +264,13 @@
             },
             "secondaryUp": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": 1
             },
             "secondaryForward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
+                "y": -1,
+                "z": 0
             }
         },
         {
@@ -279,37 +279,37 @@
                 "y": 1,
                 "z": 0
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
-                "x": 1,
-                "y": 0,
+                "x": 0,
+                "y": -1,
                 "z": 0
             },
             "up": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": -1
             },
             "forward": {
-                "x": 0,
-                "y": 0,
-                "z": 1
-            },
-            "secondaryType": "Empty",
-            "secondaryRight": {
                 "x": 1,
                 "y": 0,
                 "z": 0
             },
-            "secondaryUp": {
+            "secondaryType": "L",
+            "secondaryRight": {
                 "x": 0,
-                "y": 1,
+                "y": 0,
+                "z": -1
+            },
+            "secondaryUp": {
+                "x": 1,
+                "y": 0,
                 "z": 0
             },
             "secondaryForward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
+                "y": -1,
+                "z": 0
             }
         },
         {
@@ -474,31 +474,31 @@
                 "y": 0,
                 "z": -1
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
-                "x": 1,
-                "y": 0,
-                "z": 0
-            },
-            "up": {
-                "x": 0,
-                "y": 1,
-                "z": 0
-            },
-            "forward": {
                 "x": 0,
                 "y": 0,
                 "z": 1
             },
-            "secondaryType": "Empty",
-            "secondaryRight": {
-                "x": 1,
+            "up": {
+                "x": -1,
                 "y": 0,
                 "z": 0
             },
-            "secondaryUp": {
+            "forward": {
+                "x": 0,
+                "y": -1,
+                "z": 0
+            },
+            "secondaryType": "L",
+            "secondaryRight": {
                 "x": 0,
                 "y": 1,
+                "z": 0
+            },
+            "secondaryUp": {
+                "x": -1,
+                "y": 0,
                 "z": 0
             },
             "secondaryForward": {
@@ -591,21 +591,21 @@
                 "y": 1,
                 "z": -1
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
-                "x": 1,
+                "x": -1,
                 "y": 0,
                 "z": 0
             },
             "up": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": 1
             },
             "forward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
+                "y": 1,
+                "z": 0
             },
             "secondaryType": "Empty",
             "secondaryRight": {
@@ -864,21 +864,21 @@
                 "y": 0,
                 "z": 0
             },
-            "type": "Empty",
+            "type": "L",
             "right": {
-                "x": 1,
+                "x": -1,
                 "y": 0,
                 "z": 0
             },
             "up": {
                 "x": 0,
-                "y": 1,
-                "z": 0
+                "y": 0,
+                "z": -1
             },
             "forward": {
                 "x": 0,
-                "y": 0,
-                "z": 1
+                "y": -1,
+                "z": 0
             },
             "secondaryType": "Empty",
             "secondaryRight": {
