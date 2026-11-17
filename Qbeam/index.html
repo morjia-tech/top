@@ -9,7 +9,10 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; width: 100%; height: 100%; background: #02060b; color: #c9f5ff;
       font-family: system-ui, sans-serif; overflow: hidden; overscroll-behavior: none; }
-    #game { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; }
+    /* Keep the original 16:9 stage. Portrait devices get letterboxing, not a different UI. */
+    #game { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(100vw, calc(100vh * 16 / 9)); height: min(100vh, calc(100vw * 9 / 16));
+      width: min(100vw, calc(100dvh * 16 / 9)); height: min(100dvh, calc(100vw * 9 / 16)); }
     canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; -webkit-touch-callout: none; }
     #loading { position: absolute; inset: 0; display: grid; place-content: center; gap: 22px;
       text-align: center; background: #02060b; padding: 32px; }
